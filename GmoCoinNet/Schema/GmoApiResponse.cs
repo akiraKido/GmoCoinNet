@@ -36,7 +36,8 @@ public record GmoApiResponse<T>(int Status, T Data, DateTime ResponseTime)
         try
         {
             var data = JsonConvert.DeserializeObject<GmoApiResponse<T>>(content,
-                new StatusJsonConverter()
+                new StatusService.StatusJsonConverter(),
+                new TickerService.TickerConverter()
             );
             if (data == null)
             {

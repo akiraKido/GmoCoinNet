@@ -54,22 +54,22 @@ internal static class StatusService
         Status.Open => Open,
         _ => throw new ArgumentOutOfRangeException(nameof(value), value, "Invalid status")
     };
-}
-
-internal class StatusJsonConverter : JsonConverter
-{
-    public override bool CanConvert(Type objectType) => objectType == typeof(Status);
-
-    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+    
+    internal class StatusJsonConverter : JsonConverter
     {
-        var status = (Status)(value ?? throw new ArgumentNullException(nameof(value)));
-        writer.WriteValue(StatusService.ToString(status));
-    }
+        public override bool CanConvert(Type objectType) => objectType == typeof(Status);
 
-    public override object ReadJson(JsonReader reader, Type objectType, object? existingValue,
-        JsonSerializer serializer)
-    {
-        var stringValue = (string)(reader.Value ?? throw new ArgumentNullException(nameof(reader.Value)));
-        return StatusService.FromString(stringValue);
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        {
+            var status = (Status)(value ?? throw new ArgumentNullException(nameof(value)));
+            writer.WriteValue(StatusService.ToString(status));
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object? existingValue,
+            JsonSerializer serializer)
+        {
+            var stringValue = (string)(reader.Value ?? throw new ArgumentNullException(nameof(reader.Value)));
+            return FromString(stringValue);
+        }
     }
 }

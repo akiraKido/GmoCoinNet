@@ -23,4 +23,7 @@
     <data name="DeserializationFailed" xml:space="preserve">
         <value>Could not deserialize:\n{0}</value>
     </data>
+    <data name="TickerHelperInvalidTicker" xml:space="preserve">
+        <value>Invalid ticker</value>
+    </data>
 </root>

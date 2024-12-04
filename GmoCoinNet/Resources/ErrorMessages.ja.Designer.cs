@@ -56,5 +56,11 @@ namespace GmoCoinNet {
                 return ResourceManager.GetString("DeserializationFailed", resourceCulture);
             }
         }
+        
+        internal static string TickerHelperInvalidTicker {
+            get {
+                return ResourceManager.GetString("TickerHelperInvalidTicker", resourceCulture);
+            }
+        }
     }
 }

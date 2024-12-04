@@ -24,4 +24,7 @@
     <data name="DeserializationFailed" xml:space="preserve">
         <value>デシリアライズできませんでした。\n{0}</value>
     </data>
+    <data name="TickerHelperInvalidTicker" xml:space="preserve">
+        <value>不正なティッカー</value>
+    </data>
 </root>
