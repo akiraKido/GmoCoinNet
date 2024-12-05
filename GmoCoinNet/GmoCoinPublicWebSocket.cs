@@ -27,7 +27,7 @@ public class GmoCoinPublicWebSocket
     /// <returns xml:lang="ja">ティッカー更新の非同期ストリーム</returns>
     public IAsyncEnumerable<TickerEntry> SubscribeToTickerStream(Ticker ticker, CancellationToken cancellationToken = default)
     {
-        return SubscribeToStream<TickerEntry>("ticker", TickerService.ToString(ticker), cancellationToken);
+        return SubscribeToStream<TickerEntry>("ticker", ticker, cancellationToken);
     }
 
     /// <summary>Subscribes to real-time order book updates for the specified symbol</summary>
@@ -40,14 +40,15 @@ public class GmoCoinPublicWebSocket
     /// <returns xml:lang="ja">板情報更新の非同期ストリーム</returns>
     public IAsyncEnumerable<OrderBookStreamEntry> SubscribeToOrderBooks(Ticker ticker, CancellationToken cancellationToken = default)
     {
-        return SubscribeToStream<OrderBookStreamEntry>("orderbooks", TickerService.ToString(ticker), cancellationToken);
+        return SubscribeToStream<OrderBookStreamEntry>("orderbooks", ticker, cancellationToken);
     }
 
     private static async IAsyncEnumerable<T> SubscribeToStream<T>(
         string channel,
-        string symbol,
+        Ticker ticker,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        var symbolString = TickerService.ToString(ticker);
         using var client = new ClientWebSocket();
         await client.ConnectAsync(new Uri(DefaultEndpoint), cancellationToken);
 
@@ -69,11 +70,11 @@ public class GmoCoinPublicWebSocket
                 cancellationToken);
         }
 
-        await SendCommandAsync("subscribe", client, channel, symbol, cancellationToken);
+        await SendCommandAsync("subscribe", client, channel, symbolString, cancellationToken);
 
         try
         {
-            var buffer = new byte[1024];
+            var buffer = new byte[10 * 1024 * 1024]; // 10 MB
             while (client.State == WebSocketState.Open && !cancellationToken.IsCancellationRequested)
             {
                 var result = await client.ReceiveAsync(
@@ -92,7 +93,7 @@ public class GmoCoinPublicWebSocket
         {
             if (client.State == WebSocketState.Open)
             {
-                await SendCommandAsync("unsubscribe", client, channel, symbol, cancellationToken);
+                await SendCommandAsync("unsubscribe", client, channel, symbolString, cancellationToken);
                 await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Subscription ended", CancellationToken.None);
             }
         }
