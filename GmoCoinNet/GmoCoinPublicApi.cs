@@ -42,7 +42,7 @@ namespace GmoCoinNet
         }
 
         /// <summary>Gets the latest rate for the specified ticker symbol.</summary>
-        /// <summary xml:lang="ja">指���した銘柄の最新レートを取得します。</summary>
+        /// <summary xml:lang="ja">指した銘柄の最新レートを取得します。</summary>
         /// <param name="ticker">The ticker symbol to get rates for. If null, returns rates for all symbols.</param>
         /// <param name="ticker" xml:lang="ja">レートを取得する銘柄。nullの場合、全銘柄のレートを返します。</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="GmoApiResponse{TickerResponse}"/> containing the latest rate information.</returns>
