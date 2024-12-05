@@ -2,8 +2,6 @@ name: Publish to NuGet
 
 on:
   push:
-    branches:
-      - master
     tags:
       - 'v*'
 
@@ -27,8 +25,8 @@ jobs:
     - name: Test
       run: dotnet test GmoCoinNet.Tests/GmoCoinNet.Tests.csproj -c Debug
     
-    # - name: Pack
-    #   run: dotnet pack GmoCoinNet/GmoCoinNet.csproj -c Release --no-build -o out
+    - name: Pack
+      run: dotnet pack GmoCoinNet/GmoCoinNet.csproj -c Release --no-build -o out
     
-    # - name: Push to NuGet
-    #   run: dotnet nuget push "./out/*.nupkg" --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+    - name: Push to NuGet
+      run: dotnet nuget push "./out/*.nupkg" --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
