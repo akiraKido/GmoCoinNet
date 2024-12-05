@@ -105,4 +105,62 @@ public class PublicApiTests(ITestOutputHelper testOutputHelper)
             await api.GetOrderBooksAsync((Ticker)999);
         });
     }
+
+    [Fact]
+    public async Task GetTradesAsync_WithBtc_ReturnsValidResponse()
+    {
+        // Arrange
+        var api = new GmoCoinPublicApi();
+
+        // Act
+        var response = await api.GetTradesAsync(Ticker.Btc);
+
+        // Assert
+        Assert.Equal(0, response.Status);
+        Assert.NotNull(response.Data);
+        Assert.NotNull(response.Data.Pagination);
+        Assert.NotEmpty(response.Data.List);
+
+        // Check pagination
+        Assert.Equal(1, response.Data.Pagination.CurrentPage);
+        Assert.True(response.Data.Pagination.Count > 0);
+
+        // Check trade entry structure
+        var firstTrade = response.Data.List[0];
+        Assert.True(firstTrade.Price > 0);
+        Assert.True(firstTrade.Size > 0);
+        Assert.True(firstTrade.Side is TradeSide.Buy or TradeSide.Sell);
+        Assert.True(firstTrade.Timestamp > DateTime.MinValue);
+    }
+
+    [Fact]
+    public async Task GetTradesAsync_WithPagination_ReturnsRequestedPageSize()
+    {
+        // Arrange
+        var api = new GmoCoinPublicApi();
+        const int expectedCount = 10;
+
+        // Act
+        var response = await api.GetTradesAsync(Ticker.Btc, page: 1, count: expectedCount);
+
+        // Assert
+        Assert.Equal(0, response.Status);
+        Assert.NotNull(response.Data);
+        Assert.Equal(1, response.Data.Pagination.CurrentPage);
+        Assert.Equal(expectedCount, response.Data.Pagination.Count);
+        Assert.True(response.Data.List.Count <= expectedCount);
+    }
+
+    [Fact]
+    public async Task GetTradesAsync_WithInvalidTicker_ThrowsException()
+    {
+        // Arrange
+        var api = new GmoCoinPublicApi();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+        {
+            await api.GetTradesAsync((Ticker)999);
+        });
+    }
 }
