@@ -49,4 +49,60 @@ public class PublicApiTests(ITestOutputHelper testOutputHelper)
         Assert.True(decimal.Parse(volume.Ask) >= 0);
         Assert.True(decimal.Parse(volume.Bid) >= 0);
     }
+
+    [Fact]
+    public async Task GetOrderBooksAsync_WithBtc_ReturnsValidResponse()
+    {
+        // Arrange
+        var api = new GmoCoinPublicApi();
+
+        // Act
+        var response = await api.GetOrderBooksAsync(Ticker.Btc);
+
+        // Assert
+        Assert.Equal(0, response.Status);
+        Assert.NotNull(response.Data);
+        Assert.Equal("BTC", response.Data.Symbol);
+        Assert.NotEmpty(response.Data.Asks);
+        Assert.NotEmpty(response.Data.Bids);
+
+        // Check order book entry structure
+        var firstAsk = response.Data.Asks[0];
+        Assert.True(firstAsk.Price > 0);
+        Assert.True(firstAsk.Size > 0);
+
+        var firstBid = response.Data.Bids[0];
+        Assert.True(firstBid.Price > 0);
+        Assert.True(firstBid.Size > 0);
+    }
+
+    [Fact]
+    public async Task GetOrderBooksAsync_WithEth_ReturnsValidResponse()
+    {
+        // Arrange
+        var api = new GmoCoinPublicApi();
+
+        // Act
+        var response = await api.GetOrderBooksAsync(Ticker.Eth);
+
+        // Assert
+        Assert.Equal(0, response.Status);
+        Assert.NotNull(response.Data);
+        Assert.Equal("ETH", response.Data.Symbol);
+        Assert.NotEmpty(response.Data.Asks);
+        Assert.NotEmpty(response.Data.Bids);
+    }
+
+    [Fact]
+    public async Task GetOrderBooksAsync_WithInvalidTicker_ThrowsException()
+    {
+        // Arrange
+        var api = new GmoCoinPublicApi();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+        {
+            await api.GetOrderBooksAsync((Ticker)999);
+        });
+    }
 }

@@ -17,7 +17,7 @@ namespace GmoCoinNet
         /// <summary>Initializes a new instance of the <see cref="GmoCoinPublicApi"/> class.</summary>
         /// <summary xml:lang="ja">GmoCoinPublicApiクラスの新しいインスタンスを初期化します。</summary>
         /// <param name="endPoint">Optional custom API endpoint URL. If null, the default endpoint will be used.</param>
-        /// <param name="endPoint" xml:lang="ja">カスタムAPIエンドポイントURL（オプション）。nullの場合、デフォルトのエンドポイントが使用されます。</param>
+        /// <param name="endPoint" xml:lang="ja">カスタムAPIエンドポイントURL（オプション）。nullの場合、デフォルトのエンドポイントが��用されます。</param>
         public GmoCoinPublicApi(string? endPoint = null)
         {
             if (endPoint != null)
@@ -62,6 +62,20 @@ namespace GmoCoinNet
             }
             var response = await HttpClientProvider.HttpClient.GetAsync(EndPoint + path);
             return await GmoApiResponse<IReadOnlyList<VolumeEntry>>.FromResponseAsync(response);
+        }
+
+        /// <summary>Gets the order book for the specified ticker symbol</summary>
+        /// <summary xml:lang="ja">指定した銘柄の板情報を取得します</summary>
+        /// <param name="ticker">The ticker symbol to get the order book for</param>
+        /// <param name="ticker" xml:lang="ja">板情報を取得する銘柄</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="GmoApiResponse{OrderBookResponse}"/> containing the order book information</returns>
+        /// <returns xml:lang="ja">板情報を含む<see cref="GmoApiResponse{OrderBookResponse}"/>を返す非同期操作を表す<see cref="Task"/></returns>
+        public async Task<GmoApiResponse<OrderBookResponse>> GetOrderBooksAsync(Ticker ticker)
+        {
+            var tickerString = TickerService.ToString(ticker);
+            string path = $"/v1/orderbooks?symbol={tickerString}";
+            var response = await HttpClientProvider.HttpClient.GetAsync(EndPoint + path);
+            return await GmoApiResponse<OrderBookResponse>.FromResponseAsync(response);
         }
     }
 }
