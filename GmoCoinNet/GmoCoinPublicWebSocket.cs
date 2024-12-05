@@ -30,6 +30,19 @@ public class GmoCoinPublicWebSocket
         return SubscribeToStream<TickerEntry>("ticker", TickerService.ToString(ticker), cancellationToken);
     }
 
+    /// <summary>Subscribes to real-time order book updates for the specified symbol</summary>
+    /// <summary xml:lang="ja">指定した銘柄のリアルタイム板情報更新を購読します</summary>
+    /// <param name="ticker">The ticker symbol to subscribe to</param>
+    /// <param name="ticker" xml:lang="ja">購読する銘柄</param>
+    /// <param name="cancellationToken">Token to cancel the subscription</param>
+    /// <param name="cancellationToken" xml:lang="ja">購読をキャンセルするためのトークン</param>
+    /// <returns>An async stream of order book updates</returns>
+    /// <returns xml:lang="ja">板情報更新の非同期ストリーム</returns>
+    public IAsyncEnumerable<OrderBookStreamEntry> SubscribeToOrderBooks(Ticker ticker, CancellationToken cancellationToken = default)
+    {
+        return SubscribeToStream<OrderBookStreamEntry>("orderbooks", TickerService.ToString(ticker), cancellationToken);
+    }
+
     private static async IAsyncEnumerable<T> SubscribeToStream<T>(
         string channel,
         string symbol,
