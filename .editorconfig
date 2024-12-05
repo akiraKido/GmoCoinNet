@@ -1,0 +1,4 @@
+[*.cs]
+
+# CS1571: XML comment has a duplicate param tag
+dotnet_diagnostic.CS1571.severity = none
