@@ -163,4 +163,87 @@ public class PublicApiTests(ITestOutputHelper testOutputHelper)
             await api.GetTradesAsync((Ticker)999);
         });
     }
+
+    [Fact]
+    public async Task GetKLinesAsync_WithBtcDaily_ReturnsValidResponse()
+    {
+        // Arrange
+        var api = new GmoCoinPublicApi();
+        var year = DateTime.UtcNow.Year.ToString();
+
+        // Act
+        var response = await api.GetKLinesAsync(Ticker.Btc, KLineInterval.OneDay, year);
+
+        // Assert
+        Assert.Equal(0, response.Status);
+        Assert.NotNull(response.Data);
+        Assert.NotEmpty(response.Data);
+
+        // Check candlestick data structure
+        var firstCandle = response.Data[0];
+        Assert.True(firstCandle.Open > 0);
+        Assert.True(firstCandle.High >= firstCandle.Open);
+        Assert.True(firstCandle.High >= firstCandle.Low);
+        Assert.True(firstCandle.Low <= firstCandle.Open);
+        Assert.True(firstCandle.Close > 0);
+        Assert.True(firstCandle.Volume >= 0);
+    }
+
+    [Fact]
+    public async Task GetKLinesAsync_WithEthMinute_ReturnsValidResponse()
+    {
+        // Arrange
+        var api = new GmoCoinPublicApi();
+        
+        // Convert current UTC time to JST (UTC+9)
+        var jstNow = DateTime.UtcNow.AddHours(9);
+        
+        // If it's before 6:00 JST, we need to use the previous day
+        var targetDate = jstNow.Hour < 6 
+            ? jstNow.AddDays(-1).ToString("yyyyMMdd")
+            : jstNow.ToString("yyyyMMdd");
+
+        // Only available after 2021-04-15
+        Assert.True(DateTime.Parse("2021-04-15") <= DateTime.UtcNow, 
+            "Minute-level data is only available from 2021-04-15 onwards");
+
+        // Act
+        var response = await api.GetKLinesAsync(Ticker.Eth, KLineInterval.OneMinute, targetDate);
+
+        // Assert
+        Assert.Equal(0, response.Status);
+        Assert.NotNull(response.Data);
+        Assert.NotEmpty(response.Data);
+
+        // Verify timestamps are in ascending order
+        var timestamps = response.Data.Select(k => k.OpenTime).ToList();
+        var sortedTimestamps = timestamps.OrderBy(t => t).ToList();
+        Assert.Equal(sortedTimestamps, timestamps);
+    }
+
+    [Fact]
+    public async Task GetKLinesAsync_WithInvalidTicker_ThrowsException()
+    {
+        // Arrange
+        var api = new GmoCoinPublicApi();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+        {
+            await api.GetKLinesAsync((Ticker)999, KLineInterval.OneDay, "20240101");
+        });
+    }
+
+    [Fact]
+    public async Task GetKLinesAsync_WithInvalidInterval_ThrowsException()
+    {
+        // Arrange
+        var api = new GmoCoinPublicApi();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+        {
+            await api.GetKLinesAsync(Ticker.Btc, (KLineInterval)999, "20240101");
+        });
+    }
 }

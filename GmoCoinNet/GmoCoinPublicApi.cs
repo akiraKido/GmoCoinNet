@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using GmoCoinNet.Network;
@@ -112,6 +113,46 @@ namespace GmoCoinNet
 
             var response = await HttpClientProvider.HttpClient.GetAsync(EndPoint + path);
             return await GmoApiResponse<TradeResponse>.FromResponseAsync(response);
+        }
+
+        /// <summary>Gets the candlestick/KLine data for the specified ticker symbol</summary>
+        /// <summary xml:lang="ja">指定した銘柄のローソク足データを取得します</summary>
+        /// <param name="ticker">The ticker symbol to get KLine data for</param>
+        /// <param name="ticker" xml:lang="ja">ローソク足データを取得する銘柄</param>
+        /// <param name="interval">The interval for KLine data</param>
+        /// <param name="interval" xml:lang="ja">ローソク足の時間間隔</param>
+        /// <param name="date">The date to get data for (format: YYYYMMDD or YYYY)</param>
+        /// <param name="date" xml:lang="ja">データを取得する日付（形式：YYYYMMDD または YYYY）</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="GmoApiResponse{T}"/> containing the KLine data</returns>
+        /// <returns xml:lang="ja">ローソク足データを含む<see cref="GmoApiResponse{T}"/>を返す非同期操作を表す<see cref="Task"/></returns>
+        public async Task<GmoApiResponse<IReadOnlyList<KLineEntry>>> GetKLinesAsync(
+            Ticker ticker,
+            KLineInterval interval,
+            string date)
+        {
+            try
+            {
+                var tickerString = TickerService.ToString(ticker);
+                var intervalString = interval.ToApiString();
+                
+                var pathBuilder = new StringBuilder("/v1/klines?symbol=")
+                    .Append(tickerString)
+                    .Append("&interval=")
+                    .Append(intervalString)
+                    .Append("&date=")
+                    .Append(date);
+
+                var response = await HttpClientProvider.HttpClient.GetAsync(EndPoint + pathBuilder);
+                return await GmoApiResponse<IReadOnlyList<KLineEntry>>.FromResponseAsync(response);
+            }
+            catch (Exception ex)
+            {
+                var tickerString = TickerService.ToString(ticker);
+                var intervalString = interval.ToApiString();
+                var path = $"/v1/klines?symbol={tickerString}&interval={intervalString}&date={date}";
+                Console.WriteLine($"Error occurred with path: {path}\n{ex}");
+                throw;
+            }
         }
     }
 }
