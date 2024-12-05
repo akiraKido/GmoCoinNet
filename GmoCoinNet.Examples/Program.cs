@@ -11,6 +11,10 @@ public class Program
     [
         new ServiceStatusExample(PublicApi),
         new BtcTickerExample(PublicApi),
+        new BtcOrderBookExample(PublicApi),
+        new BtcTradesExample(PublicApi),
+        new BtcKLinesExample(PublicApi),
+        new TradeRulesExample(PublicApi),
         new BtcTickerStreamExample(WebSocket),
         new BtcOrderBookStreamExample(WebSocket)
     ];
@@ -28,10 +32,17 @@ public class Program
                 Console.WriteLine($"{i + 1}. {Examples[i].Name}");
             }
             Console.WriteLine($"{Examples.Length + 1}. Exit");
-            
+            Console.WriteLine("\nPress 'q' to quit");
             Console.Write($"\nSelect an option (1-{Examples.Length + 1}): ");
 
-            if (!int.TryParse(Console.ReadLine(), out var choice) || choice < 1 || choice > Examples.Length + 1)
+            var key = Console.ReadKey(true);
+            if (key.KeyChar == 'q' || key.KeyChar == 'Q')
+            {
+                Console.WriteLine("\nGoodbye!");
+                break;
+            }
+
+            if (!int.TryParse(key.KeyChar.ToString(), out var choice) || choice < 1 || choice > Examples.Length + 1)
             {
                 continue;
             }
@@ -61,7 +72,7 @@ public class Program
             if (choice <= Examples.Length)
             {
                 Console.WriteLine("\nPress any key to return to menu...");
-                Console.ReadKey();
+                Console.ReadKey(true);
             }
         }
     }
