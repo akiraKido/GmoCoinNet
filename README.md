@@ -31,10 +31,10 @@ Install via NuGet Package Manager:
     var publicApi = new GmoCoinPublicApi();
 
     // Get order book
-    var orderBook = await publicApi.GetOrderBookAsync("BTC_JPY");
+    var orderBook = await publicApi.GetOrderBooksAsync(Ticker.BtcJpy);
 
     // Get recent trades
-    var trades = await publicApi.GetTradesAsync("BTC_JPY");
+    var trades = await publicApi.GetTradesAsync(Ticker.BtcJpy);
 
     // Get trading rules
     var rules = await publicApi.GetTradeRulesAsync();
@@ -46,18 +46,14 @@ Install via NuGet Package Manager:
     // Create WebSocket client
     var ws = new GmoCoinPublicWebSocket();
 
-    // Subscribe to order book updates
-    ws.SubscribeToOrderBook("BTC_JPY");
-
-    // Handle order book updates
-    ws.OnOrderBookUpdate += (sender, update) => 
-    {
-        Console.WriteLine($"Ask Price: {update.Ask[0].Price}");
-        Console.WriteLine($"Bid Price: {update.Bid[0].Price}");
-    };
-
     // Connect to WebSocket
     await ws.ConnectAsync();
+
+    // Subscribe to ticker updates
+    await foreach (var update in ws.SubscribeToTickerAsync(Ticker.BtcJpy))
+    {
+        Console.WriteLine($"Ask: {update.Ask}, Bid: {update.Bid}");
+    }
 
 ## Documentation
 
