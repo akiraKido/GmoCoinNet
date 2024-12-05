@@ -2,46 +2,72 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <LangVersion>default</LangVersion>
+        <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
         <NoWarn>$(NoWarn);CS1571</NoWarn>
+        
+        <!-- Package Information -->
+        <PackageId>GmoCoinNet</PackageId>
+        <Version>0.0.1</Version>
+        <Authors>Akira Kido</Authors>
+        <Company>Akira Kido</Company>
+        <Description>A .NET client library for the GMO Coin cryptocurrency exchange API</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/akirakido/gmocoinnet</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/akirakido/gmocoinnet</RepositoryUrl>
+        <PackageTags>cryptocurrency;gmo;trading;api;bitcoin</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        
+        <!-- Source Link -->
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        
+        <!-- XML Documentation -->
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\Debug\netstandard2.0\GmoCoinNet.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug\netstandard2.0\GmoCoinNet.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DocumentationFile>bin\Release\netstandard2.0\GmoCoinNet.xml</DocumentationFile>
+        <DocumentationFile>bin\Release\netstandard2.0\GmoCoinNet.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-      <EmbeddedResource Update="Resources\ErrorMessages.resx">
-        <Generator>ResXFileCodeGenerator</Generator>
-        <LastGenOutput>ErrorMessages.Designer.cs</LastGenOutput>
-      </EmbeddedResource>
-      <EmbeddedResource Update="Resources\ErrorMessages.ja.resx">
-        <Generator>ResXFileCodeGenerator</Generator>
-        <LastGenOutput>ErrorMessages.ja.Designer.cs</LastGenOutput>
-      </EmbeddedResource>
+        <None Include="..\README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="Resources\ErrorMessages.Designer.cs">
-        <DesignTime>True</DesignTime>
-        <AutoGen>True</AutoGen>
-        <DependentUpon>ErrorMessages.resx</DependentUpon>
-      </Compile>
-      <Compile Update="Resources\ErrorMessages.ja.Designer.cs">
-        <DesignTime>True</DesignTime>
-        <AutoGen>True</AutoGen>
-        <DependentUpon>ErrorMessages.ja.resx</DependentUpon>
-      </Compile>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+        <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.0" />
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <EmbeddedResource Update="Resources\ErrorMessages.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>ErrorMessages.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Resources\ErrorMessages.ja.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>ErrorMessages.ja.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="Resources\ErrorMessages.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>ErrorMessages.resx</DependentUpon>
+        </Compile>
+        <Compile Update="Resources\ErrorMessages.ja.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>ErrorMessages.ja.resx</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>
