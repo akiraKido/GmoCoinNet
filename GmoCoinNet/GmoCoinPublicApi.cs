@@ -89,7 +89,7 @@ namespace GmoCoinNet
         /// <param name="count">Optional number of items per page (defaults to 100)</param>
         /// <param name="count" xml:lang="ja">1ページあたりの取得件数（省略時は100）</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="GmoApiResponse{TradeResponse}"/> containing the trade history</returns>
-        /// <returns xml:lang="ja">取引履歴を含む<see cref="GmoApiResponse{TradeResponse}"/>を返す非同期操作を表す<see cref="Task"/></returns>
+        /// <returns xml:lang="ja">取引履歴を含む<see cref="GmoApiResponse{TradeResponse}"/>を返す非同���操作を表す<see cref="Task"/></returns>
         public async Task<GmoApiResponse<TradeResponse>> GetTradesAsync(
             Ticker ticker,
             int? page = null,
@@ -153,6 +153,17 @@ namespace GmoCoinNet
                 Console.WriteLine($"Error occurred with path: {path}\n{ex}");
                 throw;
             }
+        }
+
+        /// <summary>Gets the trading rules for all symbols</summary>
+        /// <summary xml:lang="ja">全銘柄の取引ルールを取得します</summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="GmoApiResponse{T}"/> containing the trading rules</returns>
+        /// <returns xml:lang="ja">取引ルールを含む<see cref="GmoApiResponse{T}"/>を返す非同期操作を表す<see cref="Task"/></returns>
+        public async Task<GmoApiResponse<IReadOnlyList<TradeRule>>> GetTradeRulesAsync()
+        {
+            const string path = "/v1/symbols";
+            var response = await HttpClientProvider.HttpClient.GetAsync(EndPoint + path);
+            return await GmoApiResponse<IReadOnlyList<TradeRule>>.FromResponseAsync(response);
         }
     }
 }

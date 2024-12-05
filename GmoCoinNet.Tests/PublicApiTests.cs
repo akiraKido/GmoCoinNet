@@ -246,4 +246,35 @@ public class PublicApiTests(ITestOutputHelper testOutputHelper)
             await api.GetKLinesAsync(Ticker.Btc, (KLineInterval)999, "20240101");
         });
     }
+
+    [Fact]
+    public async Task GetTradeRulesAsync_ReturnsValidResponse()
+    {
+        // Arrange
+        var api = new GmoCoinPublicApi();
+
+        // Act
+        var response = await api.GetTradeRulesAsync();
+
+        // Assert
+        Assert.Equal(0, response.Status);
+        Assert.NotNull(response.Data);
+        Assert.NotEmpty(response.Data);
+
+        // Check BTC spot trading rules
+        var btcRule = response.Data.FirstOrDefault(r => r.Symbol == "BTC");
+        Assert.NotNull(btcRule);
+        Assert.True(btcRule.MinOrderSize > 0);
+        Assert.True(btcRule.MaxOrderSize > btcRule.MinOrderSize);
+        Assert.True(btcRule.SizeStep > 0);
+        Assert.True(btcRule.TickSize > 0);
+        
+        // Check BTC_JPY leveraged trading rules
+        var btcJpyRule = response.Data.FirstOrDefault(r => r.Symbol == "BTC_JPY");
+        Assert.NotNull(btcJpyRule);
+        Assert.True(btcJpyRule.MinOrderSize > 0);
+        Assert.True(btcJpyRule.MaxOrderSize > btcJpyRule.MinOrderSize);
+        Assert.True(btcJpyRule.SizeStep > 0);
+        Assert.True(btcJpyRule.TickSize > 0);
+    }
 }
