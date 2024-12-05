@@ -80,6 +80,11 @@ public class GmoCoinPublicWebSocket
                 var result = await client.ReceiveAsync(
                     new ArraySegment<byte>(buffer),
                     cancellationToken);
+                
+                if (result.MessageType == WebSocketMessageType.Close || cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
 
                 var json = Encoding.UTF8.GetString(buffer, 0, result.Count);
                 var data = JsonConvert.DeserializeObject<T>(json);
