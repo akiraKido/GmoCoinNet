@@ -71,6 +71,7 @@ jobs:
             -H "content-type: application/json" \
             -d "{
               \"model\": \"claude-3.5-sonnet-latest\",
+              \"max_tokens\": 4096,
               \"messages\": [{
                 \"role\": \"user\",
                 \"content\": ${ESCAPED_PROMPT}
