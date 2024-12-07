@@ -27,20 +27,14 @@ jobs:
       - name: Check and Generate PR Description
         id: pr-description
         run: |
-          if [ -z "${{ github.event.pull_request.body }}" ]; then
-            echo "PR description is empty. Generating from diff..."
-            chmod +x .github/workflows/scripts/generate-pr-description.sh
-            .github/workflows/scripts/generate-pr-description.sh \
-              "origin/${{ github.base_ref }}" \
-              "${{ github.sha }}" \
-              "${{ secrets.GITHUB_TOKEN }}" \
-              "${{ github.repository }}" \
-              "${{ github.event.pull_request.number }}"
-          else
-            echo "description<<EOF" >> $GITHUB_OUTPUT
-            echo "${{ github.event.pull_request.body }}" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-          fi
+          chmod +x .github/workflows/scripts/generate-pr-description.sh
+          .github/workflows/scripts/generate-pr-description.sh \
+            "origin/${{ github.base_ref }}" \
+            "${{ github.sha }}" \
+            "${{ secrets.GITHUB_TOKEN }}" \
+            "${{ github.repository }}" \
+            "${{ github.event.pull_request.number }}" \
+            "${{ github.event.pull_request.body }}"
 
       - name: Read CONTRIBUTING.md
         id: rules

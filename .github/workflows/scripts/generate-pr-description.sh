@@ -80,6 +80,11 @@ $(git diff --stat "$BASE_REF" "$SHA")
 EOF
 )
 
+# If there's an existing description, add it as a comment
+if [ ! -z "$6" ]; then
+    DESCRIPTION+=$'\n\n<details><summary>Previous Description</summary>\n\n'"$6"$'\n</details>'
+fi
+
 # Update PR description using GitHub API
 curl -X PATCH \
   -H "Authorization: token ${GITHUB_TOKEN}" \
