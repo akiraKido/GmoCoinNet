@@ -29,39 +29,13 @@ jobs:
         run: |
           if [ -z "${{ github.event.pull_request.body }}" ]; then
             echo "PR description is empty. Generating from diff..."
-            
-            # Get the diff and format it into a description
-            DIFF_SUMMARY=$(git diff --stat origin/${{ github.base_ref }} ${{ github.sha }})
-            DETAILED_CHANGES=$(git diff --unified=0 origin/${{ github.base_ref }} ${{ github.sha }} | grep '^[+-]' | grep -v '^[+-]\{3\}')
-            
-            # Create a structured description
-            DESCRIPTION=$(cat << 'EOF'
-            ## Automated PR Description
-            
-            ### Files Changed
-            \`\`\`
-            ${DIFF_SUMMARY}
-            \`\`\`
-            
-            ### Detailed Changes
-            \`\`\`diff
-            ${DETAILED_CHANGES}
-            \`\`\`
-            
-            > Note: This description was automatically generated. Please update it with more context if needed.
-            EOF
-            )
-            
-            # Update PR description using GitHub API
-            curl -X PATCH \
-              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" \
-              -d "{\"body\": $(echo "$DESCRIPTION" | jq -R -s .)}"
-            
-            echo "description<<EOF" >> $GITHUB_OUTPUT
-            echo "$DESCRIPTION" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
+            chmod +x .github/workflows/scripts/generate-pr-description.sh
+            .github/workflows/scripts/generate-pr-description.sh \
+              "origin/${{ github.base_ref }}" \
+              "${{ github.sha }}" \
+              "${{ secrets.GITHUB_TOKEN }}" \
+              "${{ github.repository }}" \
+              "${{ github.event.pull_request.number }}"
           else
             echo "description<<EOF" >> $GITHUB_OUTPUT
             echo "${{ github.event.pull_request.body }}" >> $GITHUB_OUTPUT
