@@ -1,0 +1,50 @@
+name: Pull Request Check
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'GmoCoinNet/**'
+      - 'GmoCoinNet.Tests/**'
+
+jobs:
+  pr-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch all history for version comparison
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Check Version
+      shell: pwsh
+      run: |
+        # Get version from target branch (master)
+        git checkout origin/master
+        $masterVersion = (Select-Xml -Path "./GmoCoinNet/GmoCoinNet.csproj" -XPath "//Version").Node.InnerText
+        
+        # Get version from PR branch
+        git checkout ${{ github.event.pull_request.head.sha }}
+        $prVersion = (Select-Xml -Path "./GmoCoinNet/GmoCoinNet.csproj" -XPath "//Version").Node.InnerText
+        
+        # Compare versions
+        $masterVersionObj = [Version]::Parse($masterVersion)
+        $prVersionObj = [Version]::Parse($prVersion)
+        
+        if ($prVersionObj -le $masterVersionObj) {
+          echo "::error::PR version ($prVersion) must be greater than master version ($masterVersion)"
+          exit 1
+        }
+        
+        echo "Version check passed: PR version ($prVersion) > master version ($masterVersion)"
+    
+    - name: Restore dependencies
+      run: dotnet restore GmoCoinNet.Tests/GmoCoinNet.Tests.csproj
+    
+    - name: Run Tests
+      run: dotnet test GmoCoinNet.Tests/GmoCoinNet.Tests.csproj -c Debug 
