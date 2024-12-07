@@ -41,23 +41,47 @@ jobs:
       - name: AI Review
         id: ai-review
         run: |
+          # Prepare the JSON payload with proper escaping
+          PROMPT=$(cat <<EOF
+          You are a code reviewer checking if a PR follows the project guidelines.
+
+          Contributing Rules:
+          ${{ steps.rules.outputs.rules }}
+
+          PR Description:
+          ${{ steps.pr-info.outputs.description }}
+          
+          Changed Files: ${{ steps.changed-files.outputs.files }}
+
+          Please review and check:
+          1. Does the PR description include all required elements?
+          2. For code changes, do they follow our code style rules?
+          3. Has the version been updated in GmoCoinNet.csproj?
+
+          Provide your review with clear pass/fail indicators for each requirement.
+          EOF
+          )
+          
+          # Escape the prompt for JSON
+          ESCAPED_PROMPT=$(echo "$PROMPT" | jq -Rs .)
+          
           RESPONSE=$(curl -X POST https://api.anthropic.com/v1/messages \
             -H "x-api-key: ${{ secrets.CLAUDE_API_KEY }}" \
             -H "anthropic-version: 2023-06-01" \
             -H "content-type: application/json" \
-            -d '{
-              "model": "claude-3.5-sonnet-latest",
-              "messages": [{
-                "role": "user",
-                "content": "You are a code reviewer checking if a PR follows the project guidelines.\n\nContributing Rules:\n${{ steps.rules.outputs.rules }}\n\nPR Description:\n${{ steps.pr-info.outputs.description }}\nChanged Files: ${{ steps.changed-files.outputs.files }}\n\nPlease review and check:\n1. Does the PR description include all required elements?\n2. For code changes, do they follow our code style rules?\n3. Has the version been updated in GmoCoinNet.csproj?\n\nProvide your review with clear pass/fail indicators for each requirement."
+            -d "{
+              \"model\": \"claude-3.5-sonnet-latest\",
+              \"messages\": [{
+                \"role\": \"user\",
+                \"content\": ${ESCAPED_PROMPT}
               }]
-            }')
+            }")
           
           # Print the full response for debugging
           echo "Full API Response:"
           echo "$RESPONSE"
           
-          # Extract and set the review content as before
+          # Extract and set the review content
           REVIEW=$(echo "$RESPONSE" | jq -r '.messages[0].content' | sed 's/"/\\"/g')
           echo "review<<EOF" >> $GITHUB_OUTPUT
           echo "$REVIEW" >> $GITHUB_OUTPUT
