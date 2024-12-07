@@ -52,7 +52,11 @@ jobs:
               }]
             }')
           
-          # Extract the review content from the response and escape it for GitHub Actions
+          # Print the full response for debugging
+          echo "Full API Response:"
+          echo "$RESPONSE"
+          
+          # Extract and set the review content as before
           REVIEW=$(echo "$RESPONSE" | jq -r '.messages[0].content' | sed 's/"/\\"/g')
           echo "review<<EOF" >> $GITHUB_OUTPUT
           echo "$REVIEW" >> $GITHUB_OUTPUT
