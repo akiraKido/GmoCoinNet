@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Make sure we're in the git repository root
+cd "$(git rev-parse --show-toplevel)"
+
 BASE_REF=$1
 SHA=$2
 GITHUB_TOKEN=$3
@@ -49,33 +52,47 @@ Changed files: $CHANGES_JSON
 Diff preview: $DIFF_CONTENT
 
 Please provide a concise summary focusing on what was actually changed or improved, not just which files were modified.
+Format your response as bullet points, starting each point with "* ".
 EOF
 )
 
-# Call Claude API
-RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
+# Debug: Print request data
+echo "Debug - Sending request to Claude API..."
+
+# Call Claude API with proper error handling
+RESPONSE=$(curl -s -w "\n%{http_code}" https://api.anthropic.com/v1/messages \
     -H "Content-Type: application/json" \
     -H "x-api-key: $CLAUDE_API_KEY" \
     -H "anthropic-version: 2023-06-01" \
-    -d "{
-        \"model\": \"claude-3-5-sonnet-latest\",
-        \"max_tokens\": 4096,
-        \"messages\": [{
-            \"role\": \"user\",
-            \"content\": $(echo "$PROMPT" | jq -R -s .)
-        }]
-    }")
+    -d @- << EOF
+{
+    "model": "claude-3-5-sonnet-latest",
+    "max_tokens": 4096,
+    "messages": [{
+        "role": "user",
+        "content": $(echo "$PROMPT" | jq -R -s .)
+    }]
+}
+EOF
+)
 
-# Debug: Print the raw response
-echo "Debug - Raw Claude Response:"
-echo "$RESPONSE" | jq '.'
+# Split response into body and status code
+RESPONSE_BODY=$(echo "$RESPONSE" | sed '$d')
+HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
 
-# Extract the summary from Claude's response
-SUMMARY=$(echo "$RESPONSE" | jq -r '.content[0].text // .message // "Error: Unable to extract summary from Claude response"')
+# Debug: Print response details
+echo "Debug - HTTP Status: $HTTP_STATUS"
+echo "Debug - Response Body:"
+echo "$RESPONSE_BODY" | jq '.'
 
-# Debug: Print the extracted summary
-echo "Debug - Extracted Summary:"
-echo "$SUMMARY"
+# Check if the request was successful
+if [ "$HTTP_STATUS" -ne 200 ]; then
+    echo "Error: Claude API request failed with status $HTTP_STATUS"
+    SUMMARY="Error: Unable to generate summary. Please check the Claude API configuration."
+else
+    # Extract the summary from Claude's response
+    SUMMARY=$(echo "$RESPONSE_BODY" | jq -r '.content[0].text // "Error: Unable to extract summary from Claude response"')
+fi
 
 # Create a structured description
 DESCRIPTION=$(cat << EOF
