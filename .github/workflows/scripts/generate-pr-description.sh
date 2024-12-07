@@ -104,6 +104,60 @@ else
     SUMMARY=$(echo "$RESPONSE_BODY" | jq -r '.content[0].text // "Error: Unable to extract summary from Claude response"')
 fi
 
+# Generate a PR title from the summary
+echo "Debug - Generating PR title..."
+TITLE_PROMPT=$(cat << EOF
+Based on this summary of changes, please generate a clear and concise pull request title (max 72 characters):
+
+$SUMMARY
+
+The title should:
+1. Start with a verb (e.g., Add, Update, Fix, Implement)
+2. Be specific but brief
+3. Not exceed 72 characters
+4. Not end with a period
+
+Example good titles:
+- "Add automated PR description generation"
+- "Update WebSocket connection handling"
+- "Fix memory leak in data processing"
+
+Please respond with only the title text, nothing else.
+EOF
+)
+
+# Call Claude API for title generation
+echo "Debug - Calling Claude API for title..."
+TITLE_RESPONSE=$(curl -s -w "\n%{http_code}" https://api.anthropic.com/v1/messages \
+    -H "Content-Type: application/json" \
+    -H "x-api-key: $CLAUDE_API_KEY" \
+    -H "anthropic-version: 2023-06-01" \
+    -H "accept: application/json" \
+    --connect-timeout 10 \
+    --max-time 30 \
+    -d @- << EOF
+{
+    "model": "claude-3-5-sonnet-latest",
+    "max_tokens": 100,
+    "messages": [{
+        "role": "user",
+        "content": $(echo "$TITLE_PROMPT" | jq -R -s .)
+    }]
+}
+EOF
+)
+
+# Split response into body and status code
+TITLE_RESPONSE_BODY=$(echo "$TITLE_RESPONSE" | sed '$d')
+TITLE_HTTP_STATUS=$(echo "$TITLE_RESPONSE" | tail -n1)
+
+# Extract the title
+if [ "$TITLE_HTTP_STATUS" -eq 200 ]; then
+    PR_TITLE=$(echo "$TITLE_RESPONSE_BODY" | jq -r '.content[0].text // "Update PR with automated changes"' | tr -d '\n')
+else
+    PR_TITLE="Update PR with automated changes"
+fi
+
 # Create a structured description
 DESCRIPTION=$(cat << EOF
 ## Automated PR Description
@@ -125,14 +179,19 @@ if [ ! -z "$7" ]; then
     DESCRIPTION+=$'\n\n<details><summary>Previous Description</summary>\n\n'"$7"$'\n</details>'
 fi
 
-# Update PR description using GitHub API
+# Update both PR title and description using GitHub API
 curl -X PATCH \
   -H "Authorization: token ${GITHUB_TOKEN}" \
   -H "Accept: application/vnd.github.v3+json" \
   "https://api.github.com/repos/${REPO}/pulls/${PR_NUMBER}" \
-  -d "{\"body\": $(echo "$DESCRIPTION" | jq -R -s .)}"
+  -d "{
+    \"title\": $(echo "$PR_TITLE" | jq -R -s .),
+    \"body\": $(echo "$DESCRIPTION" | jq -R -s .)
+  }"
 
-# Output the description for GitHub Actions
+# Output both description and title for GitHub Actions
 echo "description<<EOF" >> $GITHUB_OUTPUT
 echo "$DESCRIPTION" >> $GITHUB_OUTPUT
-echo "EOF" >> $GITHUB_OUTPUT 
+echo "EOF" >> $GITHUB_OUTPUT
+
+echo "title=$PR_TITLE" >> $GITHUB_OUTPUT 
