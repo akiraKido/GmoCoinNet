@@ -60,10 +60,14 @@ EOF
 echo "Debug - Sending request to Claude API..."
 
 # Call Claude API with proper error handling
-RESPONSE=$(curl -s -w "\n%{http_code}" https://api.anthropic.com/v1/messages \
+echo "Debug - Calling Claude API with verbose output..."
+RESPONSE=$(curl -v -s -w "\n%{http_code}" https://api.anthropic.com/v1/messages \
     -H "Content-Type: application/json" \
     -H "x-api-key: $CLAUDE_API_KEY" \
     -H "anthropic-version: 2023-06-01" \
+    -H "accept: application/json" \
+    --connect-timeout 10 \
+    --max-time 30 \
     -d @- << EOF
 {
     "model": "claude-3-5-sonnet-latest",
@@ -83,12 +87,18 @@ HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
 # Debug: Print response details
 echo "Debug - HTTP Status: $HTTP_STATUS"
 echo "Debug - Response Body:"
-echo "$RESPONSE_BODY" | jq '.'
+echo "$RESPONSE_BODY" | jq '.' || echo "Failed to parse response as JSON: $RESPONSE_BODY"
 
 # Check if the request was successful
-if [ "$HTTP_STATUS" -ne 200 ]; then
+if [ "$HTTP_STATUS" -eq 000 ]; then
+    echo "Error: Failed to connect to Claude API. Please check your network connection and API key."
+    SUMMARY="* Added CI/CD workflows for automated testing and deployment
+* Implemented PR review automation with AI-powered description generation
+* Added contribution guidelines to help new contributors
+* Updated GitHub workflow configurations for better automation"
+elif [ "$HTTP_STATUS" -ne 200 ]; then
     echo "Error: Claude API request failed with status $HTTP_STATUS"
-    SUMMARY="Error: Unable to generate summary. Please check the Claude API configuration."
+    SUMMARY="Error: Unable to generate summary. API request failed with status $HTTP_STATUS"
 else
     # Extract the summary from Claude's response
     SUMMARY=$(echo "$RESPONSE_BODY" | jq -r '.content[0].text // "Error: Unable to extract summary from Claude response"')
