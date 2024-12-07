@@ -35,7 +35,7 @@ jobs:
             DETAILED_CHANGES=$(git diff --unified=0 origin/${{ github.base_ref }} ${{ github.sha }} | grep '^[+-]' | grep -v '^[+-]\{3\}')
             
             # Create a structured description
-            DESCRIPTION=$(cat <<EOF
+            DESCRIPTION=$(cat << 'HEREDOC'
             ## Automated PR Description
             
             ### Files Changed
@@ -56,7 +56,7 @@ jobs:
             curl -X PATCH \
               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               -H "Accept: application/vnd.github.v3+json" \
-              https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} \
+              "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" \
               -d "{\"body\": $(echo "$DESCRIPTION" | jq -R -s .)}"
             
             echo "description<<EOF" >> $GITHUB_OUTPUT
