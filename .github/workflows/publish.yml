@@ -2,20 +2,30 @@ name: Publish to NuGet
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - master
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     environment: Default
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '8.0.x'
+    
+    - name: Get Version
+      id: version
+      run: |
+        version=$(grep -oP '(?<=<Version>).*(?=</Version>)' GmoCoinNet/GmoCoinNet.csproj)
+        echo "version=$version" >> $GITHUB_OUTPUT
     
     - name: Restore dependencies
       run: dotnet restore GmoCoinNet/GmoCoinNet.csproj
@@ -31,3 +41,17 @@ jobs:
     
     - name: Push to NuGet
       run: dotnet nuget push "./out/*.nupkg" --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+    
+    - name: Create and push tag
+      run: |
+        git tag v${{ steps.version.outputs.version }}
+        git push origin v${{ steps.version.outputs.version }}
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ steps.version.outputs.version }}
+        name: Release v${{ steps.version.outputs.version }}
+        draft: false
+        prerelease: false
+        generate_release_notes: true
