@@ -24,7 +24,7 @@ jobs:
         run: |
           echo "files=$(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }} | tr '\n' ' ')" >> $GITHUB_OUTPUT
 
-      - name: Generate PR Description
+      - name: Check and Generate PR Description
         id: pr-description
         run: |
           if [ -z "${{ github.event.pull_request.body }}" ]; then
@@ -58,12 +58,16 @@ jobs:
 
           Contributing Rules:
           ${{ steps.rules.outputs.rules }}
+
+          PR Description:
+          ${{ steps.pr-description.outputs.description }}
           
           Changed Files: ${{ steps.changed-files.outputs.files }}
 
           Please review and check:
-          1. For code changes, do they follow our code style rules?
-          2. Has the version been updated in GmoCoinNet.csproj?
+          1. Does the PR description include all required elements?
+          2. For code changes, do they follow our code style rules?
+          3. Has the version been updated in GmoCoinNet.csproj?
 
           Provide your review with clear pass/fail indicators for each requirement.
           EOF
