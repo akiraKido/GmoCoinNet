@@ -66,8 +66,16 @@ RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
         }]
     }")
 
+# Debug: Print the raw response
+echo "Debug - Raw Claude Response:"
+echo "$RESPONSE" | jq '.'
+
 # Extract the summary from Claude's response
-SUMMARY=$(echo "$RESPONSE" | jq -r '.content[0].text')
+SUMMARY=$(echo "$RESPONSE" | jq -r '.content[0].text // .message // "Error: Unable to extract summary from Claude response"')
+
+# Debug: Print the extracted summary
+echo "Debug - Extracted Summary:"
+echo "$SUMMARY"
 
 # Create a structured description
 DESCRIPTION=$(cat << EOF
