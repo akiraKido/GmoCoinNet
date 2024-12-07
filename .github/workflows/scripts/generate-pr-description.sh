@@ -11,17 +11,17 @@ DIFF_SUMMARY=$(git diff --stat "$BASE_REF" "$SHA")
 DETAILED_CHANGES=$(git diff --unified=0 "$BASE_REF" "$SHA" | grep '^[+-]' | grep -v '^[+-]\{3\}')
 
 # Create a structured description
-DESCRIPTION=$(cat << 'EOF'
+DESCRIPTION=$(cat << EOF
 ## Automated PR Description
 
 ### Files Changed
 \`\`\`
-${DIFF_SUMMARY}
+$DIFF_SUMMARY
 \`\`\`
 
 ### Detailed Changes
 \`\`\`diff
-${DETAILED_CHANGES}
+$DETAILED_CHANGES
 \`\`\`
 
 > Note: This description was automatically generated. Please update it with more context if needed.
