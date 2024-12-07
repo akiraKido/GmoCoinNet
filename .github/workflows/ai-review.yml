@@ -35,7 +35,7 @@ jobs:
             DETAILED_CHANGES=$(git diff --unified=0 origin/${{ github.base_ref }} ${{ github.sha }} | grep '^[+-]' | grep -v '^[+-]\{3\}')
             
             # Create a structured description
-            DESCRIPTION=$(cat << 'HEREDOC'
+            DESCRIPTION=$(cat << 'EOF'
             ## Automated PR Description
             
             ### Files Changed
