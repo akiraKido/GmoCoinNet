@@ -82,6 +82,14 @@ jobs:
           echo "Full API Response:"
           echo "$RESPONSE"
           
+          # Check if response contains an error
+          ERROR_TYPE=$(echo "$RESPONSE" | jq -r '.error.type // empty')
+          if [ ! -z "$ERROR_TYPE" ]; then
+            echo "error=$ERROR_TYPE" >> $GITHUB_OUTPUT
+            echo "Error occurred: $ERROR_TYPE"
+            exit 0  # Exit successfully to prevent workflow failure, but with error flag set
+          fi
+          
           # Extract and set the review content
           REVIEW=$(echo "$RESPONSE" | jq -r '.content[0].text' | sed 's/"/\\"/g')
           echo "review<<EOF" >> $GITHUB_OUTPUT
@@ -89,6 +97,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Comment PR
+        if: steps.ai-review.outputs.error == ''
         uses: actions/github-script@v6
         with:
           script: |
