@@ -83,7 +83,7 @@ jobs:
           echo "$RESPONSE"
           
           # Extract and set the review content
-          REVIEW=$(echo "$RESPONSE" | jq -r '.messages[0].content' | sed 's/"/\\"/g')
+          REVIEW=$(echo "$RESPONSE" | jq -r '.content[0].text' | sed 's/"/\\"/g')
           echo "review<<EOF" >> $GITHUB_OUTPUT
           echo "$REVIEW" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
