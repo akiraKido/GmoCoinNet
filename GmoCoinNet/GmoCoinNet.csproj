@@ -8,7 +8,7 @@
         
         <!-- Package Information -->
         <PackageId>GmoCoinNet</PackageId>
-        <Version>0.0.1-f2</Version>
+        <Version>0.0.1-f3</Version>
         <Authors>Akira Kido</Authors>
         <Company>Akira Kido</Company>
         <Description>A .NET client library for the GMO Coin cryptocurrency exchange API</Description>
