@@ -28,11 +28,11 @@ public class PublicApiTests(ITestOutputHelper testOutputHelper)
         foreach (var volume in volumes.Data)
         {
             testOutputHelper.WriteLine($"Volume for {volume.Symbol}: Ask={volume.Ask} Bid={volume.Bid}");
-            Assert.True(decimal.Parse(volume.Ask) >= 0);
-            Assert.True(decimal.Parse(volume.Bid) >= 0);
-            Assert.True(decimal.Parse(volume.High) >= 0); 
-            Assert.True(decimal.Parse(volume.Low) >= 0);
-            Assert.True(decimal.Parse(volume.Volume) >= 0);
+            Assert.True(volume.Ask >= 0);
+            Assert.True(volume.Bid >= 0);
+            Assert.True(volume.High >= 0); 
+            Assert.True(volume.Low >= 0);
+            Assert.True(volume.Volume >= 0);
         }
     }
 
@@ -45,9 +45,9 @@ public class PublicApiTests(ITestOutputHelper testOutputHelper)
         
         var volume = volumes.Data[0];
         testOutputHelper.WriteLine($"BTC/JPY volume: Ask={volume.Ask} Bid={volume.Bid}");
-        Assert.Equal(TickerService.ToString(Ticker.BtcJpy), volume.Symbol);
-        Assert.True(decimal.Parse(volume.Ask) >= 0);
-        Assert.True(decimal.Parse(volume.Bid) >= 0);
+        Assert.Equal(Ticker.BtcJpy, volume.Symbol);
+        Assert.True(volume.Ask >= 0);
+        Assert.True(volume.Bid >= 0);
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public class PublicApiTests(ITestOutputHelper testOutputHelper)
         // Assert
         Assert.Equal(0, response.Status);
         Assert.NotNull(response.Data);
-        Assert.Equal("BTC", response.Data.Symbol);
+        Assert.Equal(Ticker.Btc, response.Data.Symbol);
         Assert.NotEmpty(response.Data.Asks);
         Assert.NotEmpty(response.Data.Bids);
 
@@ -88,7 +88,7 @@ public class PublicApiTests(ITestOutputHelper testOutputHelper)
         // Assert
         Assert.Equal(0, response.Status);
         Assert.NotNull(response.Data);
-        Assert.Equal("ETH", response.Data.Symbol);
+        Assert.Equal(Ticker.Eth, response.Data.Symbol);
         Assert.NotEmpty(response.Data.Asks);
         Assert.NotEmpty(response.Data.Bids);
     }
@@ -262,7 +262,7 @@ public class PublicApiTests(ITestOutputHelper testOutputHelper)
         Assert.NotEmpty(response.Data);
 
         // Check BTC spot trading rules
-        var btcRule = response.Data.FirstOrDefault(r => r.Symbol == "BTC");
+        var btcRule = response.Data.FirstOrDefault(r => r.Symbol == Ticker.Btc);
         Assert.NotNull(btcRule);
         Assert.True(btcRule.MinOrderSize > 0);
         Assert.True(btcRule.MaxOrderSize > btcRule.MinOrderSize);
@@ -270,7 +270,7 @@ public class PublicApiTests(ITestOutputHelper testOutputHelper)
         Assert.True(btcRule.TickSize > 0);
         
         // Check BTC_JPY leveraged trading rules
-        var btcJpyRule = response.Data.FirstOrDefault(r => r.Symbol == "BTC_JPY");
+        var btcJpyRule = response.Data.FirstOrDefault(r => r.Symbol == Ticker.BtcJpy);
         Assert.NotNull(btcJpyRule);
         Assert.True(btcJpyRule.MinOrderSize > 0);
         Assert.True(btcJpyRule.MaxOrderSize > btcJpyRule.MinOrderSize);
