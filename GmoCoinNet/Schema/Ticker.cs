@@ -52,6 +52,8 @@ public enum Ticker
     Sol,
     /// <summary>Astar</summary>
     Astr,
+    /// <summary>NOT A HOTEL COIN</summary>
+    Nac,
     
     #endregion
 

@@ -28,6 +28,7 @@ internal static class TickerService
     private const string Doge = "DOGE";
     private const string Sol = "SOL";
     private const string Astr = "ASTR";
+    private const string Nac = "NAC";
     private const string BtcJpy = "BTC_JPY";
     private const string EthJpy = "ETH_JPY";
     private const string BchJpy = "BCH_JPY";
@@ -67,6 +68,7 @@ internal static class TickerService
             Ticker.Doge => Doge,
             Ticker.Sol => Sol,
             Ticker.Astr => Astr,
+            Ticker.Nac => Nac,
             Ticker.BtcJpy => BtcJpy,
             Ticker.EthJpy => EthJpy,
             Ticker.BchJpy => BchJpy,
@@ -107,6 +109,7 @@ internal static class TickerService
         Doge => Ticker.Doge,
         Sol => Ticker.Sol,
         Astr => Ticker.Astr,
+        Nac => Ticker.Nac,
         BtcJpy => Ticker.BtcJpy,
         EthJpy => Ticker.EthJpy,
         BchJpy => Ticker.BchJpy,
