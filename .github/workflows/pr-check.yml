@@ -32,11 +32,14 @@ jobs:
         git checkout ${{ github.event.pull_request.head.sha }}
         $prVersion = (Select-Xml -Path "./GmoCoinNet/GmoCoinNet.csproj" -XPath "//Version").Node.InnerText
         
-        # Compare versions
-        $masterVersionObj = [Version]::Parse($masterVersion)
-        $prVersionObj = [Version]::Parse($prVersion)
+        # Install NuGet.Versioning module for proper SemVer comparison
+        Install-Module -Name NuGet.Versioning -Force -Scope CurrentUser
         
-        if ($prVersionObj -le $masterVersionObj) {
+        # Compare versions using NuGet.Versioning
+        $masterVersionObj = [NuGet.Versioning.NuGetVersion]::Parse($masterVersion)
+        $prVersionObj = [NuGet.Versioning.NuGetVersion]::Parse($prVersion)
+        
+        if ($prVersionObj.CompareTo($masterVersionObj) -le 0) {
           echo "::error::PR version ($prVersion) must be greater than master version ($masterVersion)"
           exit 1
         }
