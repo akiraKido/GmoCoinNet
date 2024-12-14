@@ -17,14 +17,14 @@ public class OrderBookResponse
 
     /// <summary>Trading pair symbol</summary>
     /// <summary xml:lang="ja">取引ペアのシンボル</summary>
-    [JsonProperty("symbol")] public readonly string Symbol;
+    [JsonProperty("symbol")] public readonly Ticker Symbol;
 
     [JsonConstructor]
     internal OrderBookResponse(IReadOnlyList<OrderBookEntry> asks, IReadOnlyList<OrderBookEntry> bids, string symbol)
     {
         Asks = asks;
         Bids = bids;
-        Symbol = symbol;
+        Symbol = TickerService.FromString(symbol);
     }
 }
 
