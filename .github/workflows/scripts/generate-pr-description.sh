@@ -151,10 +151,34 @@ EOF
 TITLE_RESPONSE_BODY=$(echo "$TITLE_RESPONSE" | sed '$d')
 TITLE_HTTP_STATUS=$(echo "$TITLE_RESPONSE" | tail -n1)
 
-# Extract the title
+# Debug: Print response details for title generation
+echo "Debug - Title HTTP Status: $TITLE_HTTP_STATUS"
+echo "Debug - Title Response Body:"
+echo "$TITLE_RESPONSE_BODY" | jq '.' || echo "Failed to parse title response as JSON: $TITLE_RESPONSE_BODY"
+
+# Extract the title with better error handling
 if [ "$TITLE_HTTP_STATUS" -eq 200 ]; then
-    PR_TITLE=$(echo "$TITLE_RESPONSE_BODY" | jq -r '.content[0].text // "Update PR with automated changes"' | tr -d '\n')
+    PR_TITLE=$(echo "$TITLE_RESPONSE_BODY" | jq -r '.content[0].text // empty' | tr -d '\n')
+    # Fallback to generating title from first summary bullet point if Claude response is empty
+    if [ -z "$PR_TITLE" ]; then
+        PR_TITLE=$(echo "$SUMMARY" | grep '^\* ' | head -n 1 | sed 's/^\* //')
+        # If title is too long, truncate it
+        if [ ${#PR_TITLE} -gt 72 ]; then
+            PR_TITLE="${PR_TITLE:0:69}..."
+        fi
+    fi
 else
+    echo "Error: Title generation failed with status $TITLE_HTTP_STATUS"
+    # Fallback to generating title from first summary bullet point
+    PR_TITLE=$(echo "$SUMMARY" | grep '^\* ' | head -n 1 | sed 's/^\* //')
+    # If title is too long, truncate it
+    if [ ${#PR_TITLE} -gt 72 ]; then
+        PR_TITLE="${PR_TITLE:0:69}..."
+    fi
+fi
+
+# Ensure we have a title
+if [ -z "$PR_TITLE" ]; then
     PR_TITLE="Update PR with automated changes"
 fi
 

@@ -32,11 +32,43 @@ jobs:
         git checkout ${{ github.event.pull_request.head.sha }}
         $prVersion = (Select-Xml -Path "./GmoCoinNet/GmoCoinNet.csproj" -XPath "//Version").Node.InnerText
         
-        # Compare versions
-        $masterVersionObj = [Version]::Parse($masterVersion)
-        $prVersionObj = [Version]::Parse($prVersion)
+        # Function to convert version string to comparable array
+        function Convert-VersionToComparable {
+          param([string]$version)
+          
+          if ($version -match '^(\d+\.\d+\.\d+)(-.*)?$') {
+            $numbers = $matches[1] -split '\.' | ForEach-Object { [int]$_ }
+            $prerelease = if ($matches[2]) { $matches[2] } else { [string]::Empty }
+            return @{
+              Numbers = $numbers
+              Prerelease = $prerelease
+            }
+          }
+          throw "Invalid version format: $version"
+        }
         
-        if ($prVersionObj -le $masterVersionObj) {
+        $masterVer = Convert-VersionToComparable $masterVersion
+        $prVer = Convert-VersionToComparable $prVersion
+        
+        # Compare version numbers first
+        for ($i = 0; $i -lt 3; $i++) {
+          if ($prVer.Numbers[$i] -gt $masterVer.Numbers[$i]) {
+            echo "Version check passed: PR version ($prVersion) > master version ($masterVersion)"
+            exit 0
+          }
+          if ($prVer.Numbers[$i] -lt $masterVer.Numbers[$i]) {
+            echo "::error::PR version ($prVersion) must be greater than master version ($masterVersion)"
+            exit 1
+          }
+        }
+        
+        # If version numbers are equal, compare pre-release strings
+        # Empty prerelease is greater than any prerelease version
+        if ($prVer.Prerelease -eq '' -and $masterVer.Prerelease -ne '') {
+          echo "Version check passed: PR version ($prVersion) > master version ($masterVersion)"
+          exit 0
+        }
+        if ($prVer.Prerelease -le $masterVer.Prerelease) {
           echo "::error::PR version ($prVersion) must be greater than master version ($masterVersion)"
           exit 1
         }

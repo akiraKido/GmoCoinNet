@@ -22,7 +22,7 @@ public class OrderBookStreamEntry
 
     /// <summary>Trading pair symbol</summary>
     /// <summary xml:lang="ja">取引ペアのシンボル</summary>
-    [JsonProperty("symbol")] public readonly string Symbol;
+    [JsonProperty("symbol")] public readonly Ticker Symbol;
 
     /// <summary>Timestamp of the update</summary>
     /// <summary xml:lang="ja">配信日時</summary>
@@ -39,7 +39,7 @@ public class OrderBookStreamEntry
         Channel = channel;
         Asks = asks;
         Bids = bids;
-        Symbol = symbol;
+        Symbol = TickerService.FromString(symbol);
         Timestamp = timestamp;
     }
 } 

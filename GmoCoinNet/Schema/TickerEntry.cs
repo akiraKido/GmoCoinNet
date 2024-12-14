@@ -33,7 +33,7 @@ public class TickerEntry
 
     /// <summary>Trading pair symbol</summary>
     /// <summary xml:lang="ja">取引ペアのシンボル</summary>
-    [JsonProperty("symbol")] public readonly string Symbol;
+    [JsonProperty("symbol")] public readonly Ticker Symbol;
 
     /// <summary>Timestamp of the last trade</summary>
     /// <summary xml:lang="ja">約定時のタイムスタンプ</summary>
@@ -61,7 +61,7 @@ public class TickerEntry
         High = decimal.Parse(high);
         Last = decimal.Parse(last);
         Low = decimal.Parse(low);
-        Symbol = symbol;
+        Symbol = TickerService.FromString(symbol);
         Timestamp = timestamp;
         Volume = decimal.Parse(volume);
     }

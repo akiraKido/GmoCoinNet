@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace GmoCoinNet.Schema;
 
@@ -8,7 +9,7 @@ public class TradeRule
 {
     /// <summary>Trading pair symbol</summary>
     /// <summary xml:lang="ja">取引ペアのシンボル</summary>
-    [JsonProperty("symbol")] public readonly string Symbol;
+    [JsonProperty("symbol")] public readonly Ticker Symbol;
 
     /// <summary>Minimum order size per transaction</summary>
     /// <summary xml:lang="ja">最小注文数量/回</summary>
@@ -36,7 +37,7 @@ public class TradeRule
 
     [JsonConstructor]
     internal TradeRule(
-        string symbol,
+        [JsonProperty("symbol")] string symbol,
         [JsonProperty("minOrderSize")] string minOrderSize,
         [JsonProperty("maxOrderSize")] string maxOrderSize,
         [JsonProperty("sizeStep")] string sizeStep,
@@ -44,7 +45,7 @@ public class TradeRule
         [JsonProperty("takerFee")] string takerFee,
         [JsonProperty("makerFee")] string makerFee)
     {
-        Symbol = symbol;
+        Symbol = TickerService.FromString(symbol);
         MinOrderSize = decimal.Parse(minOrderSize);
         MaxOrderSize = decimal.Parse(maxOrderSize);
         SizeStep = decimal.Parse(sizeStep);
@@ -52,4 +53,4 @@ public class TradeRule
         TakerFee = decimal.Parse(takerFee);
         MakerFee = decimal.Parse(makerFee);
     }
-} 
+}
